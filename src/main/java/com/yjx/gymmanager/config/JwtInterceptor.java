@@ -31,11 +31,11 @@ public class JwtInterceptor implements HandlerInterceptor {
             CurrentUser user = jwtUtil.parseToken(authorization.substring(7));
             String uri = request.getRequestURI();
             if (uri.startsWith("/api/admin") && !"admin".equals(user.getRole())) {
-                writeUnauthorized(response, "无管理员权限");
+                writeUnauthorized(response, "需要管理员权限");
                 return false;
             }
             if (uri.startsWith("/api/member") && !"member".equals(user.getRole())) {
-                writeUnauthorized(response, "无会员权限");
+                writeUnauthorized(response, "需要会员权限");
                 return false;
             }
             UserContext.set(user);

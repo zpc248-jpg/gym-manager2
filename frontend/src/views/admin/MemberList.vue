@@ -8,11 +8,11 @@
     <el-table :data="filteredRows" style="width: 100%">
       <el-table-column prop="name" label="姓名" />
       <el-table-column prop="phone" label="手机号" />
-      <el-table-column prop="gender" label="性别" width="80" />
+      <el-table-column prop="gender" label="性别" width="90" />
       <el-table-column prop="age" label="年龄" width="80" />
       <el-table-column prop="cardType" label="会员卡" />
       <el-table-column prop="expireTime" label="到期时间" />
-      <el-table-column label="状态" width="90">
+      <el-table-column label="状态" width="100">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '正常' : '禁用' }}</el-tag>
         </template>
@@ -25,8 +25,8 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="dialogVisible" :title="form.id ? '编辑会员' : '新增会员'" width="520px">
-      <el-form :model="form" label-width="88px">
+    <el-dialog v-model="dialogVisible" :title="form.id ? '编辑会员' : '新增会员'" width="560px">
+      <el-form :model="form" label-width="104px">
         <el-form-item label="姓名"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="手机号"><el-input v-model="form.phone" /></el-form-item>
         <el-form-item label="性别">
@@ -41,6 +41,12 @@
         <el-form-item label="状态">
           <el-switch v-model="form.status" :active-value="1" :inactive-value="0" active-text="正常" inactive-text="禁用" />
         </el-form-item>
+        <template v-if="!form.id">
+          <el-form-item label="登录账号"><el-input v-model="form.username" placeholder="会员登录用户名" /></el-form-item>
+          <el-form-item label="登录密码">
+            <el-input v-model="form.password" type="password" show-password placeholder="默认 123456" />
+          </el-form-item>
+        </template>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -68,8 +74,21 @@ const filteredRows = computed(() => {
 })
 
 function openDialog(row) {
-  Object.assign(form, row || { name: '', phone: '', gender: '男', age: 20, cardType: '月卡', expireTime: '', status: 1 })
-  if (!row) delete form.id
+  Object.keys(form).forEach((key) => delete form[key])
+  Object.assign(
+    form,
+    row || {
+      name: '',
+      phone: '',
+      gender: '男',
+      age: 20,
+      cardType: '月卡',
+      expireTime: '',
+      status: 1,
+      username: '',
+      password: '123456',
+    },
+  )
   dialogVisible.value = true
 }
 

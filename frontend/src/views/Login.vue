@@ -31,7 +31,7 @@
     <section class="login-panel">
       <div class="panel-title">
         <h2>登录系统</h2>
-        <p>使用开发文档中的测试账号快速进入</p>
+        <p>使用初始化账号登录系统。</p>
       </div>
 
       <el-form ref="formRef" :model="form" :rules="rules" size="large" @keyup.enter="handleLogin">
@@ -56,7 +56,6 @@
         <el-button @click="fillAccount('admin')">管理员 admin / 123456</el-button>
         <el-button @click="fillAccount('member')">会员 zhangsan / 123456</el-button>
       </div>
-      <p class="demo-tip">后端登录接口未就绪时，上面两个账号会自动走本地演示登录。</p>
     </section>
   </main>
 </template>
@@ -84,17 +83,8 @@ const rules = {
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
-const demoUsers = {
-  admin: { token: 'demo-admin-token', userId: 1, username: 'admin', role: 'admin' },
-  zhangsan: { token: 'demo-member-token', userId: 2, username: 'zhangsan', role: 'member' },
-}
-
 function fillAccount(type) {
-  if (type === 'admin') {
-    form.username = 'admin'
-  } else {
-    form.username = 'zhangsan'
-  }
+  form.username = type === 'admin' ? 'admin' : 'zhangsan'
   form.password = '123456'
 }
 
@@ -110,13 +100,6 @@ async function handleLogin() {
     userStore.setUser(user)
     ElMessage.success('登录成功')
     goHome(user.role)
-  } catch (error) {
-    const demoUser = demoUsers[form.username]
-    if (demoUser && form.password === '123456') {
-      userStore.setUser(demoUser)
-      ElMessage.success('已进入本地演示模式')
-      goHome(demoUser.role)
-    }
   } finally {
     loading.value = false
   }

@@ -21,6 +21,7 @@ export const adminApi = {
 export const memberApi = {
   profile: () => request.get('/member/profile'),
   updateProfile: (data) => request.put('/member/profile', data),
+  updatePassword: (data) => request.put('/member/profile/password', data),
   courses: () => request.get('/member/courses'),
   appointments: () => request.get('/member/appointments'),
   reserve: (courseId) => request.post('/member/appointments', { courseId }),

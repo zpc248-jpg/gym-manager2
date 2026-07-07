@@ -4,12 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yjx.gymmanager.common.BusinessException;
 import com.yjx.gymmanager.common.CurrentUser;
 import com.yjx.gymmanager.common.Result;
+import com.yjx.gymmanager.dto.LoginRequest;
 import com.yjx.gymmanager.entity.SysUser;
 import com.yjx.gymmanager.mapper.SysUserMapper;
 import com.yjx.gymmanager.util.JwtUtil;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,13 +45,5 @@ public class AuthController {
         data.put("role", user.getRole());
         data.put("relatedId", user.getRelatedId());
         return Result.ok(data);
-    }
-
-    @Data
-    public static class LoginRequest {
-        @NotBlank(message = "请输入用户名")
-        private String username;
-        @NotBlank(message = "请输入密码")
-        private String password;
     }
 }

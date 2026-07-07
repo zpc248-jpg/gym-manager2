@@ -4,14 +4,20 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yjx.gymmanager.common.CurrentUser;
 import com.yjx.gymmanager.common.Result;
 import com.yjx.gymmanager.common.UserContext;
+import com.yjx.gymmanager.dto.ReserveRequest;
 import com.yjx.gymmanager.entity.Appointment;
 import com.yjx.gymmanager.mapper.AppointmentMapper;
 import com.yjx.gymmanager.service.AppointmentService;
 import com.yjx.gymmanager.service.GymQueryService;
 import com.yjx.gymmanager.vo.AppointmentVO;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -43,10 +49,5 @@ public class MemberAppointmentController {
         CurrentUser user = UserContext.get();
         appointmentService.cancel(id, user.getRelatedId(), false);
         return Result.ok();
-    }
-
-    @Data
-    public static class ReserveRequest {
-        private Long courseId;
     }
 }

@@ -34,6 +34,7 @@ export const useGymStore = defineStore('gym', {
     coaches: [...demoCoaches],
     courses: [...demoCourses],
     appointments: [...demoAppointments],
+    users: [],
     currentMemberId: 1,
   }),
   getters: {
@@ -68,13 +69,15 @@ export const useGymStore = defineStore('gym', {
   },
   actions: {
     async loadAdminData() {
-      const [members, coaches, courses, appointments] = await Promise.all([
-        adminApi.members(),
-        adminApi.coaches(),
-        adminApi.courses(),
-        adminApi.appointments(),
-      ])
-      this.members = members || []
+        const [users, members, coaches, courses, appointments] = await Promise.all([
+          adminApi.users(),
+          adminApi.members(),
+          adminApi.coaches(),
+          adminApi.courses(),
+          adminApi.appointments(),
+        ])
+        this.users = users || []
+        this.members = members || []
       this.coaches = coaches || []
       this.courses = courses || []
       this.appointments = appointments || []
@@ -100,6 +103,15 @@ export const useGymStore = defineStore('gym', {
         const { username, password, ...member } = payload
         await adminApi.createMember({ member, username, password })
       }
+      await this.loadAdminData()
+    },
+    async saveUser(payload) {
+      if (payload.id) await adminApi.updateUser(payload.id, payload)
+      else await adminApi.createUser(payload)
+      await this.loadAdminData()
+    },
+    async removeUser(id) {
+      await adminApi.deleteUser(id)
       await this.loadAdminData()
     },
     async removeMember(id) {

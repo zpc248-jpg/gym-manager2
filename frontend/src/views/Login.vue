@@ -52,10 +52,6 @@
         </el-button>
       </el-form>
 
-      <div class="quick-login">
-        <el-button @click="fillAccount('admin')">管理员 admin / 123456</el-button>
-        <el-button @click="fillAccount('member')">会员 zhangsan / 123456</el-button>
-      </div>
     </section>
   </main>
 </template>
@@ -81,11 +77,6 @@ const form = reactive({
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-}
-
-function fillAccount(type) {
-  form.username = type === 'admin' ? 'admin' : 'zhangsan'
-  form.password = '123456'
 }
 
 function goHome(role) {

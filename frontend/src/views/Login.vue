@@ -91,8 +91,12 @@ async function handleLogin() {
     userStore.setUser(user)
     ElMessage.success('登录成功')
     goHome(user.role)
-  } finally {
-    loading.value = false
-  }
+  } catch (err){
+  // 捕获接口异常，弹窗展示后端返回的错误信息
+  const errMsg = err.response?.data?.msg || '请求失败，请检查后端服务'
+  ElMessage.error(errMsg)
+} finally {
+  loading.value = false
+}
 }
 </script>

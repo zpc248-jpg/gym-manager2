@@ -1,5 +1,6 @@
 package com.yjx.gymmanager.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yjx.gymmanager.entity.Member;
 import lombok.Data;
 
@@ -13,21 +14,9 @@ public class AdminMemberVO {
     private String gender;
     private Integer age;
     private String cardType;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDate expireTime;
     private Integer status;
     private String username;
-
-    public static AdminMemberVO from(Member member, String username) {
-        AdminMemberVO vo = new AdminMemberVO();
-        vo.setId(member.getId());
-        vo.setName(member.getName());
-        vo.setPhone(member.getPhone());
-        vo.setGender(member.getGender());
-        vo.setAge(member.getAge());
-        vo.setCardType(member.getCardType());
-        vo.setExpireTime(member.getExpireTime());
-        vo.setStatus(member.getStatus());
-        vo.setUsername(username);
-        return vo;
-    }
+    private String password;
 }

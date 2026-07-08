@@ -1,5 +1,6 @@
 package com.yjx.gymmanager.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yjx.gymmanager.entity.Appointment;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

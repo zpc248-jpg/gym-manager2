@@ -7,9 +7,12 @@ import com.yjx.gymmanager.common.Result;
 import com.yjx.gymmanager.dto.LoginRequest;
 import com.yjx.gymmanager.entity.SysUser;
 import com.yjx.gymmanager.mapper.SysUserMapper;
+import com.yjx.gymmanager.service.SysUserService;
 import com.yjx.gymmanager.util.JwtUtil;
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,22 +23,17 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
-    private final SysUserMapper sysUserMapper;
-    private final JwtUtil jwtUtil;
+    @Resource
+    private SysUserMapper sysUserMapper;
+    @Resource
+    private JwtUtil jwtUtil;
+    @Resource
+    private SysUserService sysUserService;
 
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {
-        SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getUsername, request.getUsername()));
-        if (user == null || !user.getPassword().equals(request.getPassword())) {
-            throw new BusinessException("用户名或密码错误");
-        }
-        if (user.getStatus() == null || user.getStatus() != 1) {
-            throw new BusinessException("账号已禁用");
-        }
-
+        SysUser user = sysUserService.loginUser(request);
         CurrentUser currentUser = new CurrentUser(user.getId(), user.getUsername(), user.getRole(), user.getRelatedId());
         String token = jwtUtil.createToken(currentUser);
         Map<String, Object> data = new HashMap<>();

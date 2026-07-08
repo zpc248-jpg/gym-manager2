@@ -18,7 +18,7 @@
           <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '正常' : '禁用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="180" fixed="right">
+      <el-table-column label="操作" width="170" fixed="right">
         <template #default="{ row }">
           <el-button text type="primary" @click="openDialog(row)">编辑</el-button>
           <el-button text type="danger" @click="remove(row)">删除</el-button>
@@ -50,7 +50,7 @@
             v-model="form.password"
             type="password"
             show-password
-            :placeholder="form.id ? '不修改请留空' : '默认 123456'"
+            :placeholder="form.id ? '不修改请留空' : '请填写登录密码'"
           />
         </el-form-item>
       </el-form>
@@ -88,13 +88,13 @@ function openDialog(row) {
       : {
           name: '',
           phone: '',
-          gender: '男',
-          age: 20,
-          cardType: '月卡',
+          gender: '',
+          age: '',
+          cardType: '',
           expireTime: '',
           status: 1,
           username: '',
-          password: '123456',
+          password: '',
         },
   )
   dialogVisible.value = true

@@ -2,10 +2,6 @@ import request from '@/utils/request'
 
 export const adminApi = {
   dashboard: () => request.get('/admin/dashboard'),
-  users: () => request.get('/admin/users'),
-  createUser: (data) => request.post('/admin/users', data),
-  updateUser: (id, data) => request.put(`/admin/users/${id}`, data),
-  deleteUser: (id) => request.delete(`/admin/users/${id}`),
   members: () => request.get('/admin/members'),
   createMember: (data) => request.post('/admin/members', data),
   updateMember: (id, data) => request.put(`/admin/members/${id}`, data),

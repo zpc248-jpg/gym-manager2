@@ -28,13 +28,34 @@ const demoAppointments = [
   { id: 3, memberId: 3, courseId: 3, status: 'canceled', createTime: '2026-07-06 21:05' },
 ]
 
+function pad(value) {
+  return String(value).padStart(2, '0')
+}
+
+function formatDateTime(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function normalizeDateTime(value) {
+  if (!value) return value
+  if (value instanceof Date) return formatDateTime(value)
+  if (typeof value === 'string') {
+    const trimmedValue = value.trim()
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(trimmedValue)) return trimmedValue
+    const isoMatch = trimmedValue.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/)
+    if (isoMatch) return `${isoMatch[1]} ${isoMatch[2]}`
+    const date = new Date(trimmedValue)
+    if (!Number.isNaN(date.getTime())) return formatDateTime(date)
+  }
+  return value
+}
+
 export const useGymStore = defineStore('gym', {
   state: () => ({
     members: [...demoMembers],
     coaches: [...demoCoaches],
     courses: [...demoCourses],
     appointments: [...demoAppointments],
-    users: [],
     currentMemberId: 1,
   }),
   getters: {
@@ -69,14 +90,12 @@ export const useGymStore = defineStore('gym', {
   },
   actions: {
     async loadAdminData() {
-        const [users, members, coaches, courses, appointments] = await Promise.all([
-          adminApi.users(),
+        const [members, coaches, courses, appointments] = await Promise.all([
           adminApi.members(),
           adminApi.coaches(),
           adminApi.courses(),
           adminApi.appointments(),
         ])
-        this.users = users || []
         this.members = members || []
       this.coaches = coaches || []
       this.courses = courses || []
@@ -98,20 +117,10 @@ export const useGymStore = defineStore('gym', {
       this.appointments = appointments || []
     },
     async saveMember(payload) {
-      if (payload.id) await adminApi.updateMember(payload.id, payload)
-      else {
-        const { username, password, ...member } = payload
-        await adminApi.createMember({ member, username, password })
-      }
-      await this.loadAdminData()
-    },
-    async saveUser(payload) {
-      if (payload.id) await adminApi.updateUser(payload.id, payload)
-      else await adminApi.createUser(payload)
-      await this.loadAdminData()
-    },
-    async removeUser(id) {
-      await adminApi.deleteUser(id)
+      const { username, password, ...member } = payload
+      const request = { member, username, password }
+      if (payload.id) await adminApi.updateMember(payload.id, request)
+      else await adminApi.createMember(request)
       await this.loadAdminData()
     },
     async removeMember(id) {
@@ -128,8 +137,13 @@ export const useGymStore = defineStore('gym', {
       await this.loadAdminData()
     },
     async saveCourse(payload) {
-      if (payload.id) await adminApi.updateCourse(payload.id, payload)
-      else await adminApi.createCourse(payload)
+      const course = {
+        ...payload,
+        startTime: normalizeDateTime(payload.startTime),
+        endTime: normalizeDateTime(payload.endTime),
+      }
+      if (payload.id) await adminApi.updateCourse(payload.id, course)
+      else await adminApi.createCourse(course)
       await this.loadAdminData()
     },
     async removeCourse(id) {

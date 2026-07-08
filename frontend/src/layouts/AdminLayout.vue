@@ -18,10 +18,6 @@
           <el-icon><User /></el-icon>
           <span>会员管理</span>
         </el-menu-item>
-        <el-menu-item index="/admin/user">
-          <el-icon><Key /></el-icon>
-          <span>用户管理</span>
-        </el-menu-item>
         <el-menu-item index="/admin/coach">
           <el-icon><Medal /></el-icon>
           <span>教练管理</span>
@@ -57,7 +53,7 @@
 </template>
 
 <script setup>
-import { Calendar, DataAnalysis, Key, Medal, SwitchButton, Tickets, User } from '@element-plus/icons-vue'
+import { Calendar, DataAnalysis, Medal, SwitchButton, Tickets, User } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 

@@ -8,6 +8,7 @@
     <el-table :data="filteredRows" style="width: 100%">
       <el-table-column prop="name" label="姓名" />
       <el-table-column prop="phone" label="手机号" />
+      <el-table-column prop="username" label="登录账号" />
       <el-table-column prop="gender" label="性别" width="90" />
       <el-table-column prop="age" label="年龄" width="80" />
       <el-table-column prop="cardType" label="会员卡" />
@@ -41,12 +42,17 @@
         <el-form-item label="状态">
           <el-switch v-model="form.status" :active-value="1" :inactive-value="0" active-text="正常" inactive-text="禁用" />
         </el-form-item>
-        <template v-if="!form.id">
-          <el-form-item label="登录账号"><el-input v-model="form.username" placeholder="会员登录用户名" /></el-form-item>
-          <el-form-item label="登录密码">
-            <el-input v-model="form.password" type="password" show-password placeholder="默认 123456" />
-          </el-form-item>
-        </template>
+        <el-form-item label="登录账号">
+          <el-input v-model="form.username" placeholder="会员登录用户名" />
+        </el-form-item>
+        <el-form-item label="登录密码">
+          <el-input
+            v-model="form.password"
+            type="password"
+            show-password
+            :placeholder="form.id ? '不修改请留空' : '默认 123456'"
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -70,24 +76,26 @@ const form = reactive({})
 const filteredRows = computed(() => {
   const value = keyword.value.trim()
   if (!value) return gymStore.members
-  return gymStore.members.filter((item) => item.name.includes(value) || item.phone.includes(value))
+  return gymStore.members.filter((item) => item.name.includes(value) || item.phone.includes(value) || item.username?.includes(value))
 })
 
 function openDialog(row) {
   Object.keys(form).forEach((key) => delete form[key])
   Object.assign(
     form,
-    row || {
-      name: '',
-      phone: '',
-      gender: '男',
-      age: 20,
-      cardType: '月卡',
-      expireTime: '',
-      status: 1,
-      username: '',
-      password: '123456',
-    },
+    row
+      ? { ...row, password: '' }
+      : {
+          name: '',
+          phone: '',
+          gender: '男',
+          age: 20,
+          cardType: '月卡',
+          expireTime: '',
+          status: 1,
+          username: '',
+          password: '123456',
+        },
   )
   dialogVisible.value = true
 }

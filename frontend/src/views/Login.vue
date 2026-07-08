@@ -70,8 +70,8 @@ const formRef = ref()
 const loading = ref(false)
 
 const form = reactive({
-  username: 'admin',
-  password: '123456',
+  username: '',
+  password: '',
 })
 
 const rules = {

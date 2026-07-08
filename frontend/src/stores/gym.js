@@ -1,33 +1,6 @@
 import { defineStore } from 'pinia'
 import { adminApi, memberApi } from '@/api/gym'
 
-const now = '2026-07-07 10:00'
-
-const demoMembers = [
-  { id: 1, name: '张三', phone: '13800000000', gender: '男', age: 22, cardType: '月卡', expireTime: '2026-12-31', status: 1 },
-  { id: 2, name: '李娜', phone: '13900000001', gender: '女', age: 28, cardType: '季卡', expireTime: '2026-10-15', status: 1 },
-  { id: 3, name: '赵明', phone: '13700000002', gender: '男', age: 35, cardType: '年卡', expireTime: '2027-03-20', status: 0 },
-]
-
-const demoCoaches = [
-  { id: 1, name: '李教练', phone: '13600000001', specialty: '燃脂塑形', entryDate: '2024-03-01', status: 1 },
-  { id: 2, name: '王教练', phone: '13600000002', specialty: '普拉提', entryDate: '2023-09-12', status: 1 },
-  { id: 3, name: '陈教练', phone: '13600000003', specialty: '力量训练', entryDate: '2025-01-08', status: 1 },
-]
-
-const demoCourses = [
-  { id: 1, name: '燃脂团课', type: '有氧', coachId: 1, startTime: '2026-07-07 09:00', endTime: '2026-07-07 10:00', capacity: 20, bookedCount: 16, status: 1 },
-  { id: 2, name: '普拉提塑形', type: '塑形', coachId: 2, startTime: '2026-07-07 14:30', endTime: '2026-07-07 15:30', capacity: 16, bookedCount: 12, status: 1 },
-  { id: 3, name: '力量训练入门', type: '力量', coachId: 3, startTime: '2026-07-07 18:30', endTime: '2026-07-07 19:30', capacity: 20, bookedCount: 20, status: 1 },
-  { id: 4, name: '瑜伽拉伸', type: '恢复', coachId: 2, startTime: '2026-07-08 19:00', endTime: '2026-07-08 20:00', capacity: 18, bookedCount: 8, status: 0 },
-]
-
-const demoAppointments = [
-  { id: 1, memberId: 1, courseId: 1, status: 'reserved', createTime: now },
-  { id: 2, memberId: 2, courseId: 2, status: 'reserved', createTime: '2026-07-07 09:18' },
-  { id: 3, memberId: 3, courseId: 3, status: 'canceled', createTime: '2026-07-06 21:05' },
-]
-
 function pad(value) {
   return String(value).padStart(2, '0')
 }
@@ -52,11 +25,11 @@ function normalizeDateTime(value) {
 
 export const useGymStore = defineStore('gym', {
   state: () => ({
-    members: [...demoMembers],
-    coaches: [...demoCoaches],
-    courses: [...demoCourses],
-    appointments: [...demoAppointments],
-    currentMemberId: 1,
+    members: [],
+    coaches: [],
+    courses: [],
+    appointments: [],
+    currentMemberId: null,
   }),
   getters: {
     dashboard: (state) => ({
@@ -90,13 +63,13 @@ export const useGymStore = defineStore('gym', {
   },
   actions: {
     async loadAdminData() {
-        const [members, coaches, courses, appointments] = await Promise.all([
-          adminApi.members(),
-          adminApi.coaches(),
-          adminApi.courses(),
-          adminApi.appointments(),
-        ])
-        this.members = members || []
+      const [members, coaches, courses, appointments] = await Promise.all([
+        adminApi.members(),
+        adminApi.coaches(),
+        adminApi.courses(),
+        adminApi.appointments(),
+      ])
+      this.members = members || []
       this.coaches = coaches || []
       this.courses = courses || []
       this.appointments = appointments || []

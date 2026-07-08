@@ -17,7 +17,7 @@
       <div class="panel chart-panel">
         <div class="section-head">
           <h2>本周预约趋势</h2>
-          <el-tag>演示数据</el-tag>
+          <el-tag>业务数据</el-tag>
         </div>
         <div ref="chartRef" class="chart"></div>
       </div>
@@ -70,7 +70,7 @@ const gymStore = useGymStore()
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer])
 
 const metrics = computed(() => [
-  { label: '会员总数', value: gymStore.dashboard.memberCount, hint: '演示数据', icon: markRaw(User), className: 'blue' },
+  { label: '会员总数', value: gymStore.dashboard.memberCount, hint: '当前会员', icon: markRaw(User), className: 'blue' },
   { label: '教练总数', value: gymStore.dashboard.coachCount, hint: '在职教练', icon: markRaw(Medal), className: 'green' },
   { label: '课程总数', value: gymStore.dashboard.courseCount, hint: '当前课程', icon: markRaw(Calendar), className: 'orange' },
   { label: '预约总数', value: gymStore.dashboard.appointmentCount, hint: '有效预约', icon: markRaw(Tickets), className: 'purple' },
@@ -104,7 +104,7 @@ onMounted(() => {
     tooltip: { trigger: 'axis' },
     series: [
       {
-        data: [18, 22, 20, 28, 31, 42, 36],
+        data: [0, 0, 0, 0, 0, 0, 0],
         type: 'bar',
         barWidth: 26,
         itemStyle: { color: '#2563eb', borderRadius: [6, 6, 0, 0] },

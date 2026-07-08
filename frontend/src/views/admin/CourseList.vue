@@ -74,6 +74,7 @@ const filteredRows = computed(() => {
 })
 
 function openDialog(row) {
+  Object.keys(form).forEach((key) => delete form[key])
   Object.assign(
     form,
     row || {
@@ -87,7 +88,6 @@ function openDialog(row) {
       status: 1,
     },
   )
-  if (!row) delete form.id
   dialogVisible.value = true
 }
 

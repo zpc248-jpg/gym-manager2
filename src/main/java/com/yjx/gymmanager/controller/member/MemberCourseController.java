@@ -2,7 +2,6 @@ package com.yjx.gymmanager.controller.member;
 
 import com.yjx.gymmanager.common.Result;
 import com.yjx.gymmanager.mapper.CourseMapper;
-import com.yjx.gymmanager.service.GymQueryService;
 import com.yjx.gymmanager.vo.CourseVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,10 +15,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberCourseController {
     private final CourseMapper courseMapper;
-    private final GymQueryService gymQueryService;
 
     @GetMapping
     public Result<List<CourseVO>> list() {
-        return Result.ok(gymQueryService.toCourseVO(courseMapper.selectList(null)));
+        List<CourseVO> list = courseMapper.getAvailableCourseList();
+        list.forEach(CourseVO::fillTimeStatus);
+        return Result.ok(list);
     }
 }

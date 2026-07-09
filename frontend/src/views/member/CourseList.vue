@@ -47,7 +47,8 @@ const filteredRows = computed(() =>
 )
 
 function courseAvailable(row) {
-  return row.status === 1 && row.bookedCount < row.capacity
+  const startTime = row.startTime ? new Date(row.startTime.replace(' ', 'T')) : null
+  return row.status === 1 && row.bookedCount < row.capacity && startTime && startTime.getTime() > Date.now()
 }
 
 async function reserve(row) {

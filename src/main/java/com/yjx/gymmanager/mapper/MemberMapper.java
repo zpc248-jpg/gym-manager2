@@ -17,7 +17,19 @@ public interface MemberMapper extends BaseMapper<Member>{
    Integer addMember(Member member);
    @Select("select id from member where name = #{name}")
    Integer selectIdByName(String name);
-   @Update("update member set name = #{member.name},phone = #{member.phone},gender = #{member.gender},age = #{member.age},card_type = #{member.cardType},expire_time = #{member.expireTime},status = #{member.status} where id = #{id}")
+   @Update("<script>" +
+           "update member " +
+           "<set>" +
+           "  <if test='member.name != null'>name = #{member.name},</if>" +
+           "  <if test='member.phone != null'>phone = #{member.phone},</if>" +
+           "  <if test='member.gender != null'>gender = #{member.gender},</if>" +
+           "  <if test='member.age != null'>age = #{member.age},</if>" +
+           "  <if test='member.cardType != null'>card_type = #{member.cardType},</if>" +
+           "  <if test='member.expireTime != null'>expire_time = #{member.expireTime},</if>" +
+           "  <if test='member.status != null'>status = #{member.status},</if>" +
+           "</set>" +
+           "where id = #{id}" +
+           "</script>")
    Integer updateById(@Param("id") long id, @Param("member") Member member);
    @Delete("delete from member where id = #{id}")
    Integer deleteMemberById(long id);

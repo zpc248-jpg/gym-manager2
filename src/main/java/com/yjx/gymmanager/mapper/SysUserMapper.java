@@ -16,6 +16,10 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     void updateUser(@Param("id") long id, @Param("user") SysUser user);
     @Select("select * from sys_user where related_id = #{id}")
     SysUser selectUserById(Long id);
+    @Select("select * from sys_user where id = #{id}")
+    SysUser selectUserByUserId(long id);
     @Delete("delete from sys_user where related_id = #{id}")
     Integer deleteUserById(@Param("id") Long id);
+    @Update("update sys_user set password = #{password} where id = #{id}")
+    Integer updateUserPassword(@Param("id") long id, @Param("password") String password);
 }

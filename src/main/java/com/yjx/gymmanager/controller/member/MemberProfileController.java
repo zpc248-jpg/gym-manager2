@@ -10,51 +10,42 @@ import com.yjx.gymmanager.entity.Member;
 import com.yjx.gymmanager.entity.SysUser;
 import com.yjx.gymmanager.mapper.MemberMapper;
 import com.yjx.gymmanager.mapper.SysUserMapper;
+import com.yjx.gymmanager.service.ProfileService;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/member/profile")
-@RequiredArgsConstructor
 public class MemberProfileController {
-    private final MemberMapper memberMapper;
-    private final SysUserMapper sysUserMapper;
+    @Resource
+    private MemberMapper memberMapper;
+    @Resource
+    private SysUserMapper sysUserMapper;
+    @Resource
+    private ProfileService profileService;
 
     @GetMapping
     public Result<Member> profile() {
-        CurrentUser user = UserContext.get();
-        return Result.ok(memberMapper.selectById(user.getRelatedId()));
+      CurrentUser user = UserContext.get();
+      long userId = user.getUserId();
+      Member member = profileService.selectMemberById(userId);
+      return Result.ok(member);
     }
 
     @PutMapping
     public Result<Void> update(@RequestBody Member member) {
         CurrentUser user = UserContext.get();
-        Member update = new Member();
-        update.setId(user.getRelatedId());
-        update.setPhone(member.getPhone());
-        update.setGender(member.getGender());
-        update.setAge(member.getAge());
-        memberMapper.updateById(update);
+       long id = user.getUserId();
+       profileService.updateMemberById(id,member);
         return Result.ok();
     }
 
     @PutMapping("/password")
     public Result<Void> updatePassword(@RequestBody PasswordRequest request) {
-        CurrentUser user = UserContext.get();
-        SysUser sysUser = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getId, user.getUserId())
-                .eq(SysUser::getRole, "member"));
-        if (sysUser == null) {
-            throw new BusinessException("用户不存在");
-        }
-        if (request.getOldPassword() == null || !request.getOldPassword().equals(sysUser.getPassword())) {
-            throw new BusinessException("旧密码不正确");
-        }
-        if (request.getNewPassword() == null || request.getNewPassword().isBlank()) {
-            throw new BusinessException("请输入新密码");
-        }
-        sysUser.setPassword(request.getNewPassword());
-        sysUserMapper.updateById(sysUser);
+       CurrentUser user = UserContext.get();
+       long userId = user.getUserId();
+       profileService.updatePassword(userId,request);
         return Result.ok();
     }
 }

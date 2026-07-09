@@ -14,10 +14,7 @@ public interface CourseMapper extends BaseMapper<Course> {
 	Course getCourseById(@Param("id") Long id);
 
 	@Select("""
-			select
-			  c.id,
-			  c.name,
-			  c.type,
+			select c.id, c.name, c.type,
 			  c.coach_id as coachId,
 			  co.name as coachName,
 			  c.start_time as startTime,
@@ -27,9 +24,27 @@ public interface CourseMapper extends BaseMapper<Course> {
 			  c.status
 			from course c
 			left join coach co on c.coach_id = co.id
-			order by c.start_time asc, c.id desc
+			order by c.start_time, c.id desc
 			""")
 	List<CourseVO> getCourseList();
+
+	@Select("""
+			select c.id, c.name, c.type,
+			  c.coach_id as coachId,
+			  co.name as coachName,
+			  c.start_time as startTime,
+			  c.end_time as endTime,
+			  c.capacity,
+			  c.booked_count as bookedCount,
+			  c.status
+			from course c
+			left join coach co on c.coach_id = co.id
+			where c.status = 1
+			  and c.start_time > now()
+			  and c.booked_count < c.capacity
+			order by c.start_time, c.id desc
+			""")
+	List<CourseVO> getAvailableCourseList();
 
 	@Insert("insert into course (name, type, coach_id, start_time, end_time, capacity, booked_count, status) " +
 			"values (#{name}, #{type}, #{coachId}, #{startTime}, #{endTime}, #{capacity}, #{bookedCount}, #{status})"	)

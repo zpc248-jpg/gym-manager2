@@ -11,6 +11,11 @@
       <el-table-column prop="coachName" label="教练" width="100" />
       <el-table-column prop="startTime" label="开始时间" min-width="160" />
       <el-table-column prop="endTime" label="结束时间" min-width="160" />
+      <el-table-column label="时间状态" width="100">
+        <template #default="{ row }">
+          <el-tag :type="timeStatusType(row.timeStatus)">{{ row.timeStatus || '-' }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="容量" width="100">
         <template #default="{ row }">{{ row.bookedCount }}/{{ row.capacity }}</template>
       </el-table-column>
@@ -21,7 +26,7 @@
       </el-table-column>
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
-          <el-button text type="primary" @click="openDialog(row)">编辑</el-button>
+          <el-button text type="primary" :disabled="row.timeStatus === '已结束'" @click="openDialog(row)">编辑</el-button>
           <el-button text type="danger" @click="remove(row)">删除</el-button>
         </template>
       </el-table-column>
@@ -37,10 +42,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="开始时间">
-          <el-date-picker v-model="form.startTime" type="datetime" value-format="YYYY-MM-DD HH:mm" />
+          <el-date-picker v-model="form.startTime" type="datetime" value-format="YYYY-MM-DD HH:mm" :disabled-date="disablePastDate" />
         </el-form-item>
         <el-form-item label="结束时间">
-          <el-date-picker v-model="form.endTime" type="datetime" value-format="YYYY-MM-DD HH:mm" />
+          <el-date-picker v-model="form.endTime" type="datetime" value-format="YYYY-MM-DD HH:mm" :disabled-date="disablePastDate" />
         </el-form-item>
         <el-form-item label="人数上限"><el-input-number v-model="form.capacity" :min="1" :max="200" /></el-form-item>
         <el-form-item label="已预约"><el-input-number v-model="form.bookedCount" :min="0" :max="form.capacity || 200" /></el-form-item>
@@ -73,6 +78,25 @@ const filteredRows = computed(() => {
   return gymStore.courseRows.filter((item) => item.name.includes(value))
 })
 
+function timeStatusType(value) {
+  if (value === '未开始') return 'primary'
+  if (value === '进行中') return 'success'
+  if (value === '已结束') return 'info'
+  return 'warning'
+}
+
+function disablePastDate(date) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return date.getTime() < today.getTime()
+}
+
+function parseDateTime(value) {
+  if (!value) return null
+  if (value instanceof Date) return value
+  return new Date(value.replace(' ', 'T'))
+}
+
 function openDialog(row) {
   Object.keys(form).forEach((key) => delete form[key])
   Object.assign(
@@ -92,6 +116,11 @@ function openDialog(row) {
 }
 
 async function save() {
+  const startTime = parseDateTime(form.startTime)
+  if (startTime && startTime.getTime() < Date.now()) {
+    ElMessage.error('课程开始时间不能早于当前时间')
+    return
+  }
   await gymStore.saveCourse({ ...form })
   dialogVisible.value = false
   ElMessage.success('保存成功')

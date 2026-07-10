@@ -1,11 +1,9 @@
 package com.yjx.gymmanager.controller.member;
 
 import com.yjx.gymmanager.common.Result;
-import com.yjx.gymmanager.mapper.CourseMapper;
-import com.yjx.gymmanager.service.AdminCourseService;
+import com.yjx.gymmanager.service.MemberCourseService;
 import com.yjx.gymmanager.vo.CourseVO;
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,11 +14,11 @@ import java.util.List;
 @RequestMapping("/api/member/courses")
 public class MemberCourseController {
     @Resource
-  private AdminCourseService adminCourseService;
+  private MemberCourseService memberCourseService;
 
     @GetMapping
     public Result<List<CourseVO>> list() {
-      List<CourseVO> list = adminCourseService.getCourseList();
+      List<CourseVO> list = memberCourseService.getAvailableCourseList();
         return Result.ok(list);
     }
 }

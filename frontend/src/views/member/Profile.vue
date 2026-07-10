@@ -85,7 +85,7 @@ const userStore = useUserStore()
 const profile = computed(() => gymStore.currentMember || {})
 const profileDialogVisible = ref(false)
 const passwordDialogVisible = ref(false)
-const form = reactive({ phone: '', age: 20, gender: '男' })
+const form = reactive({ phone: '', age: '', gender: '' })
 const passwordForm = reactive({ oldPassword: '', newPassword: '' })
 
 function resetForm() {

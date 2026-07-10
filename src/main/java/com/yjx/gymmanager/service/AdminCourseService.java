@@ -57,8 +57,8 @@ public class AdminCourseService {
         if (id == null || courseMapper.getCourseById(id) == null) {
             throw new BusinessException("课程不存在");
         }
-        if (!appointmentMapper.selectByCourseId(id).isEmpty()) {
-            throw new BusinessException("课程已有预约，不能删除");
+        if (!appointmentMapper.selectReservedByCourseId(id).isEmpty()) {
+            throw new BusinessException("课程还有有效预约，不能删除");
         }
         courseMapper.deleteCourse(id);
     }

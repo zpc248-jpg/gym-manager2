@@ -11,6 +11,6 @@ import java.util.List;
 @Mapper
 public interface AppointmentMapper extends BaseMapper<Appointment> {
 
-	@Select("select * from appointment where course_id = #{id};")
-	List<Appointment> selectByCourseId(@Param("id") Long id);
+	@Select("select * from appointment where course_id = #{id} and status = 'reserved';")
+	List<Appointment> selectReservedByCourseId(@Param("id") Long id);
 }

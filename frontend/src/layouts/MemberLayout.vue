@@ -34,6 +34,7 @@
         <div class="user-actions">
           <el-tag type="primary" effect="light">会员</el-tag>
           <span class="username">{{ userStore.username }}</span>
+          <el-button :icon="House" @click="aiDialogVisible = true">AI助手</el-button>
           <el-button :icon="SwitchButton" @click="handleLogout">退出</el-button>
         </div>
       </el-header>
@@ -42,16 +43,20 @@
       </el-main>
     </el-container>
   </el-container>
+  <AiChatDialog v-model="aiDialogVisible" placeholder="例如：我可以预约哪些课程" />
 </template>
 
 <script setup>
 import { Calendar, House, SwitchButton, Tickets } from '@element-plus/icons-vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import AiChatDialog from '@/components/AiChatDialog.vue'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
+const aiDialogVisible = ref(false)
 
 function handleLogout() {
   userStore.logout()

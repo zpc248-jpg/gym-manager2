@@ -21,3 +21,9 @@ mybatis-plus:
 jwt:
   secret: ${JWT_SECRET:gym-manager-demo-secret-key-must-be-long-enough-2026}
   expire-hours: 24
+
+ai:
+  zhipu:
+    api-key: a83ab7818e7e4ccc9df4759457d9b18f.aoNuQGU1dhp9rnHB
+    base-url: ${ZHIPU_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+    model: ${ZHIPU_MODEL:glm-4.7-flash}

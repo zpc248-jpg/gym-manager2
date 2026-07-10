@@ -5,7 +5,6 @@ import com.yjx.gymmanager.common.CurrentUser;
 import com.yjx.gymmanager.entity.Appointment;
 import com.yjx.gymmanager.mapper.AppointmentMapper;
 import com.yjx.gymmanager.mapper.CourseMapper;
-import com.yjx.gymmanager.service.GymQueryService;
 import com.yjx.gymmanager.vo.AppointmentVO;
 import com.yjx.gymmanager.vo.CourseVO;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,12 @@ public class AiBusinessContextService {
     public String directReply(String question, CurrentUser currentUser) {
         if (currentUser != null && "member".equals(currentUser.getRole()) && needMyAppointmentReply(question)) {
             return buildMyAppointmentReply(currentUser.getRelatedId());
+        }
+        if (needEndedCourseReply(question)) {
+            return buildCourseListReply("已结束课程如下：", getEndedCourses());
+        }
+        if (needAllCourseReply(question)) {
+            return buildCourseListReply("系统全部课程如下：", getAllCourses());
         }
         if (needAvailableCourseReply(question)) {
             return buildAvailableCourseReply();
@@ -63,6 +68,20 @@ public class AiBusinessContextService {
         return askAvailable && courseOrAppointment;
     }
 
+    private boolean needEndedCourseReply(String question) {
+        if (question == null || question.isBlank()) {
+            return false;
+        }
+        return question.contains("课程") && containsAny(question, "已结束", "结束", "过期");
+    }
+
+    private boolean needAllCourseReply(String question) {
+        if (question == null || question.isBlank()) {
+            return false;
+        }
+        return question.contains("课程") && containsAny(question, "全部", "所有", "总共", "一共", "几门", "四门");
+    }
+
     private boolean needMyAppointmentReply(String question) {
         if (question == null || question.isBlank()) {
             return false;
@@ -79,6 +98,41 @@ public class AiBusinessContextService {
             }
         }
         return false;
+    }
+
+    private List<CourseVO> getAllCourses() {
+        List<CourseVO> courses = courseMapper.getCourseList();
+        courses.forEach(CourseVO::fillTimeStatus);
+        return courses;
+    }
+
+    private List<CourseVO> getEndedCourses() {
+        return getAllCourses().stream()
+                .filter(course -> "已结束".equals(course.getTimeStatus()))
+                .toList();
+    }
+
+    private String buildCourseListReply(String title, List<CourseVO> courses) {
+        if (courses.isEmpty()) {
+            return "没有查询到相关课程。";
+        }
+
+        StringBuilder builder = new StringBuilder(title).append("\n");
+        for (CourseVO course : courses) {
+            int capacity = course.getCapacity() == null ? 0 : course.getCapacity();
+            int bookedCount = course.getBookedCount() == null ? 0 : course.getBookedCount();
+            builder.append("- ").append(course.getName())
+                    .append("，类型：").append(course.getType())
+                    .append("，教练：").append(course.getCoachName())
+                    .append("，时间：").append(formatDateTime(course.getStartTime()))
+                    .append(" - ").append(formatDateTime(course.getEndTime()))
+                    .append("，预约：").append(bookedCount)
+                    .append("/")
+                    .append(capacity)
+                    .append("，状态：").append(course.getTimeStatus())
+                    .append("\n");
+        }
+        return builder.toString();
     }
 
     private String buildAvailableCourseReply() {

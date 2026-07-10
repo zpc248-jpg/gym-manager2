@@ -1,13 +1,24 @@
 spring:
+  data:
+    redis:
+      host: 192.168.74.180
+      port: 6379
+      password: 123456
+      database: 0
+      connect-timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
   application:
     name: gym-manager
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/gym_manager?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
-    password: 1234
-
-
+    password: 123456
 server:
   port: 8080
 

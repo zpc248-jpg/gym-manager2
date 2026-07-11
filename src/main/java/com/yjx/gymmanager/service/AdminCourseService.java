@@ -6,6 +6,8 @@ import com.yjx.gymmanager.mapper.AppointmentMapper;
 import com.yjx.gymmanager.mapper.CourseMapper;
 import com.yjx.gymmanager.vo.CourseVO;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,12 +21,17 @@ public class AdminCourseService {
     @Resource
     private AppointmentMapper appointmentMapper;
 
+    //这个注解会让 Spring 在执行 getCourseList() 前先查 Redis。
+//    @Cacheable(value = "adminCourse", key = "'list'")
     public List<CourseVO> getCourseList() {
         List<CourseVO> list = courseMapper.getCourseList();
         list.forEach(CourseVO::fillTimeStatus);
         return list;
     }
 
+
+    //新增课程后，旧缓存里的数据已经过时（少了一条新数据），必须清除。
+//    @CacheEvict(value = "adminCourse", allEntries = true)
     public void addCourse(Course course) {
         checkCourse(course);
         if (course.getBookedCount() == null) {
@@ -36,6 +43,9 @@ public class AdminCourseService {
         courseMapper.addCourse(course);
     }
 
+
+    //更新课程后，旧缓存里的数据已经过时（少一条数据，多了一条数据），必须清除。
+//    @CacheEvict(value = "adminCourse", allEntries = true)
     public void updateCourse(Long id, Course course) {
         if (id == null) {
             throw new BusinessException("课程ID不能为空");
@@ -51,6 +61,9 @@ public class AdminCourseService {
         courseMapper.updateCourse(id, course);
     }
 
+
+    //删除课程后，旧缓存里的数据已经过时（少一条数据），必须清除。
+//    @CacheEvict(value = "adminCourse", allEntries = true)
     public void deleteCourse(Long id) {
 
 

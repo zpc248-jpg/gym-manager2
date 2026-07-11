@@ -42,3 +42,4 @@ ai:
 logging:
   level:
     com.baomidou.mybatisplus.core.injector.methods: ERROR
+    org.springframework.cache: TRACE

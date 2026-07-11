@@ -1,6 +1,7 @@
 package com.yjx.gymmanager.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yjx.gymmanager.entity.Member;
 import com.yjx.gymmanager.vo.AdminMemberVO;
 import org.apache.ibatis.annotations.*;
@@ -11,6 +12,18 @@ import java.util.List;
 public interface MemberMapper extends BaseMapper<Member>{
    @Select("select m.*,u.username from member m LEFT JOIN sys_user u ON m.id = u.related_id ")
    List<AdminMemberVO> selectAll();
+
+   @Select("""
+           select m.*, u.username
+           from member m
+           left join sys_user u on m.id = u.related_id
+           where #{keyword} = ''
+              or m.name like concat('%', #{keyword}, '%')
+              or m.phone like concat('%', #{keyword}, '%')
+              or u.username like concat('%', #{keyword}, '%')
+           order by m.id desc
+           """)
+   Page<AdminMemberVO> pageMember(Page<AdminMemberVO> page, @Param("keyword") String keyword);
    @Select("select * from member where id = #{id}")
    Member selectMemberById(long id);
    @Insert("insert into member(name,phone,gender,age,card_type,expire_time,status) values(#{name},#{phone},#{gender},#{age},#{cardType},#{expireTime},#{status})")

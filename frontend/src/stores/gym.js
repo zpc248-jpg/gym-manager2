@@ -26,8 +26,16 @@ function normalizeDateTime(value) {
 export const useGymStore = defineStore('gym', {
   state: () => ({
     members: [],
+    memberTotal: 0,
+    memberPageNum: 1,
+    memberPageSize: 10,
+    memberKeyword: '',
     coaches: [],
     courses: [],
+    courseTotal: 0,
+    coursePageNum: 1,
+    coursePageSize: 10,
+    courseKeyword: '',
     appointments: [],
     currentMemberId: null,
   }),
@@ -74,6 +82,31 @@ export const useGymStore = defineStore('gym', {
       this.courses = courses || []
       this.appointments = appointments || []
     },
+    async loadMemberPage(params = {}) {
+      const pageNum = params.pageNum || this.memberPageNum || 1
+      const pageSize = params.pageSize || this.memberPageSize || 10
+      const keyword = typeof params.keyword === 'string' ? params.keyword : this.memberKeyword || ''
+      const result = await adminApi.memberPage({ pageNum, pageSize, keyword })
+      this.members = result?.records || []
+      this.memberTotal = result?.total || 0
+      this.memberPageNum = result?.pageNum || pageNum
+      this.memberPageSize = result?.pageSize || pageSize
+      this.memberKeyword = keyword
+    },
+    async loadCoaches() {
+      this.coaches = (await adminApi.coaches()) || []
+    },
+    async loadCoursePage(params = {}) {
+      const pageNum = params.pageNum || this.coursePageNum || 1
+      const pageSize = params.pageSize || this.coursePageSize || 10
+      const keyword = typeof params.keyword === 'string' ? params.keyword : this.courseKeyword || ''
+      const result = await adminApi.coursePage({ pageNum, pageSize, keyword })
+      this.courses = result?.records || []
+      this.courseTotal = result?.total || 0
+      this.coursePageNum = result?.pageNum || pageNum
+      this.coursePageSize = result?.pageSize || pageSize
+      this.courseKeyword = keyword
+    },
     async loadMemberData() {
       const [profile, courses, appointments] = await Promise.all([
         memberApi.profile(),
@@ -94,11 +127,13 @@ export const useGymStore = defineStore('gym', {
       const request = { member, username, password }
       if (payload.id) await adminApi.updateMember(payload.id, request)
       else await adminApi.createMember(request)
-      await this.loadAdminData()
+      await this.loadMemberPage()
     },
     async removeMember(id) {
       await adminApi.deleteMember(id)
-      await this.loadAdminData()
+      const total = Math.max(this.memberTotal - 1, 0)
+      const pages = Math.max(Math.ceil(total / this.memberPageSize), 1)
+      await this.loadMemberPage({ pageNum: Math.min(this.memberPageNum, pages) })
     },
     async saveCoach(payload) {
       if (payload.id) await adminApi.updateCoach(payload.id, payload)
@@ -117,11 +152,13 @@ export const useGymStore = defineStore('gym', {
       }
       if (payload.id) await adminApi.updateCourse(payload.id, course)
       else await adminApi.createCourse(course)
-      await this.loadAdminData()
+      await this.loadCoursePage()
     },
     async removeCourse(id) {
       await adminApi.deleteCourse(id)
-      await this.loadAdminData()
+      const total = Math.max(this.courseTotal - 1, 0)
+      const pages = Math.max(Math.ceil(total / this.coursePageSize), 1)
+      await this.loadCoursePage({ pageNum: Math.min(this.coursePageNum, pages) })
     },
     async reserveCourse(courseId) {
       await memberApi.reserve(courseId)

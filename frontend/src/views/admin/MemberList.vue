@@ -1,8 +1,11 @@
 <template>
   <div class="panel page-panel">
     <div class="toolbar">
-      <el-input v-model="keyword" clearable placeholder="按姓名或手机号查询" :prefix-icon="Search" />
-      <el-button type="primary" :icon="Plus" @click="openDialog()">新增会员</el-button>
+      <el-input v-model="keyword" clearable placeholder="按姓名或手机号查询" :prefix-icon="Search" @keyup.enter="handleSearch" @clear="handleSearch" />
+      <div class="section-actions">
+        <el-button :icon="Search" @click="handleSearch">查询</el-button>
+        <el-button type="primary" :icon="Plus" @click="openDialog()">新增会员</el-button>
+      </div>
     </div>
 
     <el-table :data="filteredRows" style="width: 100%">
@@ -25,6 +28,17 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <el-pagination
+      class="table-pagination"
+      v-model:current-page="pageNum"
+      v-model:page-size="pageSize"
+      :page-sizes="[5, 10, 20, 50]"
+      :total="gymStore.memberTotal"
+      layout="total, sizes, prev, pager, next, jumper"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <el-dialog v-model="dialogVisible" :title="form.id ? '编辑会员' : '新增会员'" width="560px">
       <el-form :model="form" label-width="104px">
@@ -70,14 +84,12 @@ import { useGymStore } from '@/stores/gym'
 
 const gymStore = useGymStore()
 const keyword = ref('')
+const pageNum = ref(1)
+const pageSize = ref(10)
 const dialogVisible = ref(false)
 const form = reactive({})
 
-const filteredRows = computed(() => {
-  const value = keyword.value.trim()
-  if (!value) return gymStore.members
-  return gymStore.members.filter((item) => item.name.includes(value) || item.phone.includes(value) || item.username?.includes(value))
-})
+const filteredRows = computed(() => gymStore.members)
 
 function openDialog(row) {
   Object.keys(form).forEach((key) => delete form[key])
@@ -112,5 +124,31 @@ async function remove(row) {
   ElMessage.success('删除成功')
 }
 
-onMounted(() => gymStore.loadAdminData())
+async function loadMembers() {
+  await gymStore.loadMemberPage({
+    pageNum: pageNum.value,
+    pageSize: pageSize.value,
+    keyword: keyword.value.trim(),
+  })
+  pageNum.value = gymStore.memberPageNum
+  pageSize.value = gymStore.memberPageSize
+}
+
+function handleSearch() {
+  pageNum.value = 1
+  loadMembers()
+}
+
+function handlePageChange(value) {
+  pageNum.value = value
+  loadMembers()
+}
+
+function handleSizeChange(value) {
+  pageSize.value = value
+  pageNum.value = 1
+  loadMembers()
+}
+
+onMounted(() => loadMembers())
 </script>

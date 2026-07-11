@@ -1,6 +1,7 @@
 package com.yjx.gymmanager.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yjx.gymmanager.entity.Course;
 import com.yjx.gymmanager.vo.CourseVO;
 import org.apache.ibatis.annotations.*;
@@ -27,6 +28,28 @@ public interface CourseMapper extends BaseMapper<Course> {
 			order by c.start_time, c.id desc
 			""")
 	List<CourseVO> getCourseList();
+
+	@Select("""
+			<script>
+			select c.id, c.name, c.type,
+			  c.coach_id as coachId,
+			  co.name as coachName,
+			  c.start_time as startTime,
+			  c.end_time as endTime,
+			  c.capacity,
+			  c.booked_count as bookedCount,
+			  c.status
+			from course c
+			left join coach co on c.coach_id = co.id
+			<where>
+			  <if test="keyword != null and keyword != ''">
+			    c.name like concat('%', #{keyword}, '%')
+			  </if>
+			</where>
+			order by c.start_time, c.id desc
+			</script>
+			""")
+	Page<CourseVO> pageCourse(Page<CourseVO> page, @Param("keyword") String keyword);
 
 	@Select("""
 			select c.id, c.name, c.type,

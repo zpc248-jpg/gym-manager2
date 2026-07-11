@@ -1,6 +1,8 @@
 package com.yjx.gymmanager.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yjx.gymmanager.common.BusinessException;
+import com.yjx.gymmanager.common.PageResult;
 import com.yjx.gymmanager.dto.AdminMemberRequest;
 import com.yjx.gymmanager.entity.Member;
 import com.yjx.gymmanager.entity.SysUser;
@@ -26,6 +28,13 @@ public class MemberService {
     public List<AdminMemberVO> getAllMember() {
         List<AdminMemberVO> members = memberMapper.selectAll();
         return members;
+    }
+
+    public PageResult<AdminMemberVO> pageMember(Long pageNum, Long pageSize, String keyword) {
+        long current = pageNum == null || pageNum < 1 ? 1 : pageNum;
+        long size = pageSize == null || pageSize < 1 ? 10 : Math.min(pageSize, 100);
+        String searchText = keyword == null ? "" : keyword.trim();
+        return PageResult.of(memberMapper.pageMember(new Page<>(current, size), searchText));
     }
     @Transactional
     public void addMember(AdminMemberRequest request) {

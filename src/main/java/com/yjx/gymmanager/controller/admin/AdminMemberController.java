@@ -2,6 +2,7 @@ package com.yjx.gymmanager.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yjx.gymmanager.common.BusinessException;
+import com.yjx.gymmanager.common.PageResult;
 import com.yjx.gymmanager.common.Result;
 import com.yjx.gymmanager.dto.AdminMemberRequest;
 import com.yjx.gymmanager.entity.Member;
@@ -40,6 +41,14 @@ public class AdminMemberController {
         List<AdminMemberVO> members = new ArrayList<>();
         members = memberService.getAllMember();
         return Result.ok(members);
+    }
+
+    @GetMapping("/page")
+    public Result<PageResult<AdminMemberVO>> page(
+            @RequestParam(defaultValue = "1") Long pageNum,
+            @RequestParam(defaultValue = "10") Long pageSize,
+            @RequestParam(required = false) String keyword) {
+        return Result.ok(memberService.pageMember(pageNum, pageSize, keyword));
     }
 
     @PostMapping

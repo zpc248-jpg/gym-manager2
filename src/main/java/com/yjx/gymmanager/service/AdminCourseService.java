@@ -1,6 +1,8 @@
 package com.yjx.gymmanager.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yjx.gymmanager.common.BusinessException;
+import com.yjx.gymmanager.common.PageResult;
 import com.yjx.gymmanager.entity.Course;
 import com.yjx.gymmanager.mapper.AppointmentMapper;
 import com.yjx.gymmanager.mapper.CourseMapper;
@@ -23,6 +25,15 @@ public class AdminCourseService {
         List<CourseVO> list = courseMapper.getCourseList();
         list.forEach(CourseVO::fillTimeStatus);
         return list;
+    }
+
+    public PageResult<CourseVO> pageCourse(Long pageNum, Long pageSize, String keyword) {
+        long current = pageNum == null || pageNum < 1 ? 1 : pageNum;
+        long size = pageSize == null || pageSize < 1 ? 10 : Math.min(pageSize, 100);
+        String searchText = keyword == null ? "" : keyword.trim();
+        Page<CourseVO> page = courseMapper.pageCourse(new Page<>(current, size), searchText);
+        page.getRecords().forEach(CourseVO::fillTimeStatus);
+        return PageResult.of(page);
     }
 
     public void addCourse(Course course) {

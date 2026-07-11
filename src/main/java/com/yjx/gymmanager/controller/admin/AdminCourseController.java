@@ -1,5 +1,6 @@
 package com.yjx.gymmanager.controller.admin;
 
+import com.yjx.gymmanager.common.PageResult;
 import com.yjx.gymmanager.common.Result;
 import com.yjx.gymmanager.entity.Course;
 import com.yjx.gymmanager.service.AdminCourseService;
@@ -24,6 +25,14 @@ public class AdminCourseController {
 	@GetMapping
 	public Result<List<CourseVO>> getCourseList() {
 		return Result.ok(adminCourseService.getCourseList());
+	}
+
+	@GetMapping("/page")
+	public Result<PageResult<CourseVO>> pageCourse(
+			@RequestParam(defaultValue = "1") Long pageNum,
+			@RequestParam(defaultValue = "10") Long pageSize,
+			@RequestParam(required = false) String keyword) {
+		return Result.ok(adminCourseService.pageCourse(pageNum, pageSize, keyword));
 	}
 
 	@PostMapping

@@ -1,8 +1,11 @@
 <template>
   <div class="panel page-panel">
     <div class="toolbar">
-      <el-input v-model="keyword" clearable placeholder="按课程名称查询" :prefix-icon="Search" />
-      <el-button type="primary" :icon="Plus" @click="openDialog()">新增课程</el-button>
+      <el-input v-model="keyword" clearable placeholder="按课程名称查询" :prefix-icon="Search" @keyup.enter="handleSearch" @clear="handleSearch" />
+      <div class="section-actions">
+        <el-button :icon="Search" @click="handleSearch">查询</el-button>
+        <el-button type="primary" :icon="Plus" @click="openDialog()">新增课程</el-button>
+      </div>
     </div>
 
     <el-table :data="filteredRows" style="width: 100%">
@@ -31,6 +34,17 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <el-pagination
+      class="table-pagination"
+      v-model:current-page="pageNum"
+      v-model:page-size="pageSize"
+      :page-sizes="[5, 10, 20, 50]"
+      :total="gymStore.courseTotal"
+      layout="total, sizes, prev, pager, next, jumper"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <el-dialog v-model="dialogVisible" :title="form.id ? '编辑课程' : '新增课程'" width="620px">
       <el-form :model="form" label-width="88px">
@@ -69,14 +83,12 @@ import { useGymStore } from '@/stores/gym'
 
 const gymStore = useGymStore()
 const keyword = ref('')
+const pageNum = ref(1)
+const pageSize = ref(10)
 const dialogVisible = ref(false)
 const form = reactive({})
 
-const filteredRows = computed(() => {
-  const value = keyword.value.trim()
-  if (!value) return gymStore.courseRows
-  return gymStore.courseRows.filter((item) => item.name.includes(value))
-})
+const filteredRows = computed(() => gymStore.courseRows)
 
 function timeStatusType(value) {
   if (value === '未开始') return 'primary'
@@ -122,6 +134,7 @@ async function save() {
     return
   }
   await gymStore.saveCourse({ ...form })
+  pageNum.value = gymStore.coursePageNum
   dialogVisible.value = false
   ElMessage.success('保存成功')
 }
@@ -129,8 +142,37 @@ async function save() {
 async function remove(row) {
   await ElMessageBox.confirm(`确认删除课程 ${row.name}？`, '删除确认', { type: 'warning' })
   await gymStore.removeCourse(row.id)
+  pageNum.value = gymStore.coursePageNum
   ElMessage.success('删除成功')
 }
 
-onMounted(() => gymStore.loadAdminData())
+async function loadCourses() {
+  await gymStore.loadCoursePage({
+    pageNum: pageNum.value  ,
+    pageSize: pageSize.value,
+    keyword: keyword.value.trim(),
+  })
+  pageNum.value = gymStore.coursePageNum
+  pageSize.value = gymStore.coursePageSize
+}
+
+function handleSearch() {
+  pageNum.value = 1
+  loadCourses()
+}
+
+function handlePageChange(value) {
+  pageNum.value = value
+  loadCourses()
+}
+
+function handleSizeChange(value) {
+  pageSize.value = value
+  pageNum.value = 1
+  loadCourses()
+}
+
+onMounted(async () => {
+  await Promise.all([gymStore.loadCoaches(), loadCourses()])
+})
 </script>

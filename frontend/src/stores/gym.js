@@ -31,6 +31,10 @@ export const useGymStore = defineStore('gym', {
     memberPageSize: 10,
     memberKeyword: '',
     coaches: [],
+    coachTotal: 0,
+    coachPageNum: 1,
+    coachPageSize: 10,
+    coachKeyword: '',
     courses: [],
     courseTotal: 0,
     coursePageNum: 1,
@@ -41,8 +45,8 @@ export const useGymStore = defineStore('gym', {
   }),
   getters: {
     dashboard: (state) => ({
-      memberCount: state.members.length,
-      coachCount: state.coaches.filter((item) => item.status === 1).length,
+      memberCount: state.memberTotal || state.members.length,
+      coachCount: state.coachTotal || state.coaches.filter((item) => item.status === 1).length,
       courseCount: state.courses.length,
       appointmentCount: state.appointments.filter((item) => item.status === 'reserved').length,
     }),
@@ -71,16 +75,23 @@ export const useGymStore = defineStore('gym', {
   },
   actions: {
     async loadAdminData() {
-      const [members, coaches, courses, appointments] = await Promise.all([
-        adminApi.members(),
+      const [dashboard, coaches, courses, appointments] = await Promise.all([
+        adminApi.dashboard(),
         adminApi.coaches(),
         adminApi.courses(),
         adminApi.appointments(),
       ])
-      this.members = members || []
+      this.members = []
       this.coaches = coaches || []
       this.courses = courses || []
       this.appointments = appointments || []
+      if (dashboard) {
+        this.memberTotal = dashboard.memberCount || 0
+        this.coachTotal = dashboard.coachCount || 0
+        this.courseTotal = dashboard.courseCount || 0
+        this.coursePageNum = 1
+        this.coursePageSize = 10
+      }
     },
     async loadMemberPage(params = {}) {
       const pageNum = params.pageNum || this.memberPageNum || 1
@@ -95,6 +106,20 @@ export const useGymStore = defineStore('gym', {
     },
     async loadCoaches() {
       this.coaches = (await adminApi.coaches()) || []
+    },
+    async fetchCoaches() {
+      await this.loadCoaches()
+    },
+    async loadCoachPage(params = {}) {
+      const pageNum = params.pageNum || this.coachPageNum || 1
+      const pageSize = params.pageSize || this.coachPageSize || 10
+      const keyword = typeof params.keyword === 'string' ? params.keyword : this.coachKeyword || ''
+      const result = await adminApi.coachPage({ pageNum, pageSize, keyword })
+      this.coaches = result?.records || []
+      this.coachTotal = result?.total || 0
+      this.coachPageNum = result?.pageNum || pageNum
+      this.coachPageSize = result?.pageSize || pageSize
+      this.coachKeyword = keyword
     },
     async loadCoursePage(params = {}) {
       const pageNum = params.pageNum || this.coursePageNum || 1
@@ -138,11 +163,15 @@ export const useGymStore = defineStore('gym', {
     async saveCoach(payload) {
       if (payload.id) await adminApi.updateCoach(payload.id, payload)
       else await adminApi.createCoach(payload)
-      await this.loadAdminData()
+      const total = Math.max(this.coachTotal + (payload.id ? 0 : 1), 0)
+      const pages = Math.max(Math.ceil(total / this.coachPageSize), 1)
+      await this.loadCoachPage({ pageNum: Math.min(this.coachPageNum, pages) })
     },
     async removeCoach(id) {
       await adminApi.deleteCoach(id)
-      await this.loadAdminData()
+      const total = Math.max(this.coachTotal - 1, 0)
+      const pages = Math.max(Math.ceil(total / this.coachPageSize), 1)
+      await this.loadCoachPage({ pageNum: Math.min(this.coachPageNum, pages) })
     },
     async saveCourse(payload) {
       const course = {

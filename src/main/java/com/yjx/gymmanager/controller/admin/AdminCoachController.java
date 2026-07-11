@@ -2,6 +2,7 @@ package com.yjx.gymmanager.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yjx.gymmanager.common.BusinessException;
+import com.yjx.gymmanager.common.PageResult;
 import com.yjx.gymmanager.common.Result;
 import com.yjx.gymmanager.entity.Coach;
 import com.yjx.gymmanager.entity.Course;
@@ -23,6 +24,14 @@ public class AdminCoachController {
     @GetMapping
     public Result<List<Coach>> list() {
         return Result.ok(coachService.getAllCoachesWithCache()); // 调用新方法
+    }
+
+    @GetMapping("/page")
+    public Result<PageResult<Coach>> page(
+            @RequestParam(defaultValue = "1") Long pageNum,
+            @RequestParam(defaultValue = "10") Long pageSize,
+            @RequestParam(required = false) String keyword) {
+        return Result.ok(coachService.pageCoach(pageNum, pageSize, keyword));
     }
 
     @PostMapping

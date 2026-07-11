@@ -1,9 +1,9 @@
 spring:
   data:
     redis:
-      host: 192.168.74.180
-      port: 6379
-      password: 123456
+      host: 192.168.100.180
+      port: 6381
+      password: 1234
       database: 0
       connect-timeout: 3000ms
       lettuce:
@@ -18,7 +18,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/gym_manager?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
-    password: 123456
+    password: 1234
 server:
   port: 8080
 

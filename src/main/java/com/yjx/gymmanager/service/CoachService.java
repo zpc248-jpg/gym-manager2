@@ -1,6 +1,8 @@
 package com.yjx.gymmanager.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yjx.gymmanager.common.PageResult;
 import com.yjx.gymmanager.entity.Coach;
 import com.yjx.gymmanager.mapper.CoachMapper;
 import lombok.RequiredArgsConstructor;
@@ -9,26 +11,31 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 @Service
 @RequiredArgsConstructor
 public class CoachService extends ServiceImpl<CoachMapper, Coach> {
 
-    /**
-     * 分页获取教练列表（直接缓存分页结果）
-     * 用 page 和 size 作为缓存 key，不同分页参数会生成不同缓存
-     */
     @Cacheable(value = "coach", key = "'list'")
     public List<Coach> getAllCoachesWithCache() {
-        return this.list(); // 全量查询
+        return this.list();
     }
 
-    /**
-     * 清除所有教练缓存（增删改后调用）
-     * 因为现在缓存 key 包含页码，所以用 allEntries = true 清除整个缓存区域
-     */
+    public PageResult<Coach> pageCoach(Long pageNum, Long pageSize, String keyword) {
+        long current = pageNum == null || pageNum < 1 ? 1 : pageNum;
+        long size = pageSize == null || pageSize < 1 ? 10 : Math.min(pageSize, 100);
+        String searchText = keyword == null ? "" : keyword.trim();
+        Page<Coach> page = this.page(
+                new Page<>(current, size),
+                new LambdaQueryWrapper<Coach>()
+                        .like(!searchText.isBlank(), Coach::getName, searchText)
+                        .orderByDesc(Coach::getId)
+        );
+        return PageResult.of(page);
+    }
+
     @CacheEvict(value = "coach", allEntries = true)
     public void clearCoachListCache() {
-        // 方法体为空，由注解驱动清除缓存
     }
 }

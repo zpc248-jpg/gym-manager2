@@ -48,33 +48,54 @@ import { Plus, Search } from '@element-plus/icons-vue'
 import { useGymStore } from '@/stores/gym'
 
 const gymStore = useGymStore()
+
+// 搜索关键词
 const keyword = ref('')
 const dialogVisible = ref(false)
 const form = reactive({})
 
+// 全量教练数据（来自 store）
+const coaches = computed(() => gymStore.coaches)
+
+// 前端过滤（基于全量数据）
 const filteredRows = computed(() => {
   const value = keyword.value.trim()
-  if (!value) return gymStore.coaches
-  return gymStore.coaches.filter((item) => item.name.includes(value))
+  if (!value) return coaches.value
+  return coaches.value.filter((item) => item.name.includes(value))
 })
 
+// 加载全量教练数据
+async function loadCoaches() {
+  await gymStore.fetchCoaches()
+}
+
+// 打开对话框（新增/编辑）
 function openDialog(row) {
   Object.assign(form, row || { name: '', phone: '', specialty: '', entryDate: '', status: 1 })
   if (!row) delete form.id
   dialogVisible.value = true
 }
 
+// 保存（新增或编辑）
 async function save() {
   await gymStore.saveCoach({ ...form })
   dialogVisible.value = false
   ElMessage.success('保存成功')
+  // 保存后重新加载全量数据
+  loadCoaches()
 }
 
+// 删除
 async function remove(row) {
   await ElMessageBox.confirm(`确认删除教练 ${row.name}？`, '删除确认', { type: 'warning' })
   await gymStore.removeCoach(row.id)
   ElMessage.success('删除成功')
+  // 删除后重新加载全量数据
+  loadCoaches()
 }
 
-onMounted(() => gymStore.loadAdminData())
+// 组件挂载时加载数据
+onMounted(() => {
+  loadCoaches()
+})
 </script>

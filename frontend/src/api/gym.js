@@ -7,6 +7,7 @@ export const adminApi = {
   createMember: (data) => request.post('/admin/members', data),
   updateMember: (id, data) => request.put(`/admin/members/${id}`, data),
   deleteMember: (id) => request.delete(`/admin/members/${id}`),
+  // ★ 修改这里：支持分页参数
   coaches: () => request.get('/admin/coaches'),
   createCoach: (data) => request.post('/admin/coaches', data),
   updateCoach: (id, data) => request.put(`/admin/coaches/${id}`, data),

@@ -63,23 +63,23 @@ export const useGymStore = defineStore('gym', {
   },
   actions: {
     // 新增：分页加载教练列表
-    async fetchCoaches(page = 1, size = 10) {
-      const res = await adminApi.coaches(page, size)   // 需要 API 支持分页参数
-      this.coaches = res.list || []
-      return res   // 返回完整响应 { total, list }
+    async fetchCoaches() {
+      const res = await adminApi.coaches(); // 无参
+      this.coaches = res || [];
+      return res;
     },
 
     async loadAdminData() {
-      // 不再加载教练数据，仅加载其他模块
-      const [members, courses, appointments] = await Promise.all([
+      const [members, coaches, courses, appointments] = await Promise.all([
         adminApi.members(),
+        adminApi.coaches(),      // 恢复
         adminApi.courses(),
         adminApi.appointments(),
-      ])
-      this.members = members || []
-      this.courses = courses || []
-      this.appointments = appointments || []
-      // coaches 由 fetchCoaches 单独加载，此处不再赋值
+      ]);
+      this.members = members || [];
+      this.coaches = coaches || [];
+      this.courses = courses || [];
+      this.appointments = appointments || [];
     },
     async loadMemberData() {
       const [profile, courses, appointments] = await Promise.all([

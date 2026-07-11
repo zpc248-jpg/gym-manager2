@@ -1,15 +1,13 @@
 package com.yjx.gymmanager.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yjx.gymmanager.common.PageResult;
 import com.yjx.gymmanager.entity.Coach;
 import com.yjx.gymmanager.mapper.CoachMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 
 @Service
@@ -20,17 +18,9 @@ public class CoachService extends ServiceImpl<CoachMapper, Coach> {
      * 分页获取教练列表（直接缓存分页结果）
      * 用 page 和 size 作为缓存 key，不同分页参数会生成不同缓存
      */
-    @Cacheable(value = "coach", key = "'page:' + #page + ':' + #size")
-    public PageResult<Coach> getCoachListPage(int page, int size) {
-        List<Coach> all = this.list();
-        long total = all.size();
-        int from = (page - 1) * size;
-        if (from >= total) {
-            return new PageResult<>(total, Collections.emptyList());
-        }
-        int to = Math.min(from + size, (int) total);
-        List<Coach> pageList = new ArrayList<>(all.subList(from, to));
-        return new PageResult<>(total, pageList);
+    @Cacheable(value = "coach", key = "'list'")
+    public List<Coach> getAllCoachesWithCache() {
+        return this.list(); // 全量查询
     }
 
     /**

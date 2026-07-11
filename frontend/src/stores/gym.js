@@ -26,7 +26,7 @@ function normalizeDateTime(value) {
 export const useGymStore = defineStore('gym', {
   state: () => ({
     members: [],
-    coaches: [],
+    coaches: [],          // 存储当前页教练数据
     courses: [],
     appointments: [],
     currentMemberId: null,
@@ -34,45 +34,52 @@ export const useGymStore = defineStore('gym', {
   getters: {
     dashboard: (state) => ({
       memberCount: state.members.length,
-      coachCount: state.coaches.filter((item) => item.status === 1).length,
+      coachCount: state.coaches.filter((item) => item.status === 1).length, // 注意：coaches 现为当前页，统计可能不准，如需要全量统计可调整，此处保留原逻辑
       courseCount: state.courses.length,
       appointmentCount: state.appointments.filter((item) => item.status === 'reserved').length,
     }),
     courseRows: (state) =>
-      state.courses.map((course) => ({
-        ...course,
-        coachName: course.coachName || state.coaches.find((coach) => coach.id === course.coachId)?.name || '-',
-      })),
+        state.courses.map((course) => ({
+          ...course,
+          coachName: course.coachName || state.coaches.find((coach) => coach.id === course.coachId)?.name || '-',
+        })),
     appointmentRows: (state) =>
-      state.appointments.map((appointment) => {
-        const member = state.members.find((item) => item.id === appointment.memberId)
-        const course = state.courses.find((item) => item.id === appointment.courseId)
-        const coach = state.coaches.find((item) => item.id === course?.coachId)
-        return {
-          ...appointment,
-          memberName: appointment.memberName || member?.name || '-',
-          courseName: appointment.courseName || course?.name || '-',
-          courseTime: appointment.courseTime || course?.startTime || '-',
-          coachName: appointment.coachName || coach?.name || '-',
-        }
-      }),
+        state.appointments.map((appointment) => {
+          const member = state.members.find((item) => item.id === appointment.memberId)
+          const course = state.courses.find((item) => item.id === appointment.courseId)
+          const coach = state.coaches.find((item) => item.id === course?.coachId)
+          return {
+            ...appointment,
+            memberName: appointment.memberName || member?.name || '-',
+            courseName: appointment.courseName || course?.name || '-',
+            courseTime: appointment.courseTime || course?.startTime || '-',
+            coachName: appointment.coachName || coach?.name || '-',
+          }
+        }),
     currentMember: (state) => state.members.find((item) => item.id === state.currentMemberId),
     myAppointments() {
       return this.appointmentRows.filter((item) => item.memberId === this.currentMemberId)
     },
   },
   actions: {
+    // 新增：分页加载教练列表
+    async fetchCoaches(page = 1, size = 10) {
+      const res = await adminApi.coaches(page, size)   // 需要 API 支持分页参数
+      this.coaches = res.list || []
+      return res   // 返回完整响应 { total, list }
+    },
+
     async loadAdminData() {
-      const [members, coaches, courses, appointments] = await Promise.all([
+      // 不再加载教练数据，仅加载其他模块
+      const [members, courses, appointments] = await Promise.all([
         adminApi.members(),
-        adminApi.coaches(),
         adminApi.courses(),
         adminApi.appointments(),
       ])
       this.members = members || []
-      this.coaches = coaches || []
       this.courses = courses || []
       this.appointments = appointments || []
+      // coaches 由 fetchCoaches 单独加载，此处不再赋值
     },
     async loadMemberData() {
       const [profile, courses, appointments] = await Promise.all([
@@ -101,13 +108,14 @@ export const useGymStore = defineStore('gym', {
       await this.loadAdminData()
     },
     async saveCoach(payload) {
+      // 只执行数据库操作，不在此处刷新列表
       if (payload.id) await adminApi.updateCoach(payload.id, payload)
       else await adminApi.createCoach(payload)
-      await this.loadAdminData()
+      // 移除 this.loadAdminData()，由组件控制刷新
     },
     async removeCoach(id) {
       await adminApi.deleteCoach(id)
-      await this.loadAdminData()
+      // 移除 this.loadAdminData()
     },
     async saveCourse(payload) {
       const course = {
